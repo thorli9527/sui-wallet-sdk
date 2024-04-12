@@ -3,6 +3,7 @@ package account
 import (
 	"encoding/base64"
 	"encoding/hex"
+	"strconv"
 
 	"github.com/thorli9527/go-aptos/crypto/derivation"
 	"github.com/thorli9527/sui-wallet-sdk/sui_types"
@@ -44,12 +45,12 @@ func NewAccountWithKeystore(keystore string) (*Account, error) {
 	return NewAccount(scheme, ksByte[1:]), nil
 }
 
-func NewAccountWithMnemonic(mnemonic string) (*Account, error) {
+func NewAccountWithMnemonicIndex(mnemonic string, index int) (*Account, error) {
 	seed, err := bip39.NewSeedWithErrorChecking(mnemonic, "")
 	if err != nil {
 		return nil, err
 	}
-	key, err := derivation.DeriveForPath("m/44'/784'/0'/0'/0'", seed)
+	key, err := derivation.DeriveForPath("m/44'/784'/0'/0'/"+strconv.Itoa(index)+"'", seed)
 	if err != nil {
 		return nil, err
 	}
@@ -60,6 +61,9 @@ func NewAccountWithMnemonic(mnemonic string) (*Account, error) {
 	return NewAccount(scheme, key.Key), nil
 }
 
+func NewAccountWithMnemonic(mnemonic string, index int) (*Account, error) {
+	return NewAccountWithMnemonicIndex(mnemonic, 0)
+}
 func (a *Account) Sign(data []byte) []byte {
 	switch a.KeyPair.Flag() {
 	case 0:
